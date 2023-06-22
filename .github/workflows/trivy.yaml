@@ -1,0 +1,51 @@
+name: build
+on:
+  workflow_dispatch:
+  schedule:
+    # https://crontab.guru/#30_0_*_*_*
+    # Every day at 00:30
+    - cron: '30 0 * * *'
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - python-version: python:3.11-gdal
+            nix-attr: python311-gdal
+          - python-version: python:3.10-gdal
+            nix-attr: python310-gdal
+          - python-version: python:3.11
+            nix-attr: python311
+          - python-version: python:3.10
+            nix-attr: python310
+    name: Build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Log into ghcr
+        uses: docker/login-action@v2
+        with:
+          registry: 'ghcr.io'
+          username: '${{ github.actor }}'
+          password: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Pull Image from GHCR
+        run: |
+          docker pull ghcr.io/loftylabs/python-nix-images/${{ matrix.python-version }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'ghcr.io/loftylabs/python-nix-images/${{ matrix.python-version }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: '${{ matrix.python-version }}'

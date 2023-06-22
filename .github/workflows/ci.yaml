@@ -1,6 +1,6 @@
 name: "Test"
 on:
-  pull-request:
+  pull_request:
     branches:
       - main
     types:
@@ -25,6 +25,7 @@ jobs:
           - python-version: python:3.10
             nix-attr: python310
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
     steps:
     - uses: actions/checkout@v3
     - uses: cachix/install-nix-action@v20
