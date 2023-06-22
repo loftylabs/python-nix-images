@@ -32,20 +32,23 @@ jobs:
         run: |
           docker pull ghcr.io/loftylabs/python-nix-images/${{ matrix.python-version }}
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+      - name: generate SBOM from built image
+        uses: anchore/sbom-action@v0
         with:
-          image-ref: 'ghcr.io/loftylabs/python-nix-images/${{ matrix.python-version }}'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          image: 'ghcr.io/loftylabs/python-nix-images/${{ matrix.python-version }}'
+          format: spdx-json
+          output-file: "${{ matrix.nix-attr }}-sbom.spdx.json"
 
+      - name: Scan SBOM
+        uses: anchore/scan-action@v3
+        id: scan-output
+        with:
+          sbom: "${{ matrix.nix-attr }}-sbom.spdx.json"
+          output-format: 'sarif'
+          only-fixed: true
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: '${{ steps.scan-output.outputs.sarif }}'
           category: '${{ matrix.python-version }}'

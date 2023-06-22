@@ -16,5 +16,8 @@
         inherit pkgs;
         inherit nix2containerPkgs;
       };
+      devShell = pkgs.mkShell {
+      	buildInputs = with pkgs; [trivy grype syft dive];
+      };
     });
 }
