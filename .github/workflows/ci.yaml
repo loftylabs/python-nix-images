@@ -1,11 +1,16 @@
 name: "Test"
 on:
-  pull_request:
-  push:
-  schedule:
-    # https://crontab.guru/#30_0_*_*_*
-    # Every day at 00:30
-    - cron: '30 0 * * *'
+  pull-request:
+    branches:
+      - main
+    types:
+      - closed
+    #   have pinned dependencies, not necessary unless we want to auto upgrade nixpkgs references
+    #
+    #   schedule:
+    #     # https://crontab.guru/#30_0_*_*_*
+    #     # Every day at 00:30
+    #     - cron: '30 0 * * *'
 jobs:
   build-and-push:
     strategy:
