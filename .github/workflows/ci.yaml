@@ -32,4 +32,13 @@ jobs:
         IMAGE_URI: 'docker://ghcr.io/loftylabs/python-nix-images/python:3.10-gdal'
         NIX_PACKAGE: 'python310-gdal'
 
-
+    - run: nix build .#python311
+    - run: scripts/push_image.sh
+      env:
+        IMAGE_URI: 'docker://ghcr.io/loftylabs/python-nix-images/python:3.11'
+        NIX_PACKAGE: 'python311'
+    - run: nix build .#python310
+    - run: scripts/push_image.sh
+      env:
+        IMAGE_URI: 'docker://ghcr.io/loftylabs/python-nix-images/python:3.10'
+        NIX_PACKAGE: 'python310'

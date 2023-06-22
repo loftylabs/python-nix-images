@@ -3,10 +3,15 @@
   pkgs,
   version,
   versionTag,
+  add_gdal ? true,
 }: let
   pythonTag = "python" + version;
   python = pkgs.${pythonTag};
-  pythonEnv = python.withPackages (p: [p.gdal]);
+  pythonBasePackages =
+    if add_gdal
+    then (p: [p.gdal])
+    else (p: []);
+  pythonEnv = python.withPackages pythonBasePackages;
 in
   nix2containerPkgs.nix2container.buildImage {
     name = "nix-python";
@@ -20,7 +25,13 @@ in
     ];
     layers = [
       (nix2containerPkgs.nix2container.buildLayer {
-        deps = [pythonEnv pkgs.gdal];
+        deps =
+          [pythonEnv]
+          ++ (
+            if add_gdal
+            then [pkgs.gdal]
+            else []
+          );
       })
     ];
   }
