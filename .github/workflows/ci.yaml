@@ -2,6 +2,10 @@ name: "Test"
 on:
   pull_request:
   push:
+  schedule:
+    # https://crontab.guru/#30_0_*_*_*
+    # Every day at 00:30
+    - cron: '30 0 * * *'
 jobs:
   build-and-push:
     strategy:
@@ -22,7 +26,7 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
     - name: Log into ghcr
-      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      uses: docker/login-action@v2
       with:
         registry: 'ghcr.io'
         username: '${{ github.actor }}'
