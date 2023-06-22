@@ -3,7 +3,18 @@ on:
   pull_request:
   push:
 jobs:
-  builds:
+  build-and-push:
+    strategy:
+      matrix:
+        include:
+          - python-version: python:3.11-gdal
+            nix-attr: python311-gdal
+          - python-version: python:3.10-gdal
+            nix-attr: python310-gdal
+          - python-version: python:3.11
+            nix-attr: python311
+          - python-version: python:3.10
+            nix-attr: python310
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -21,24 +32,8 @@ jobs:
         name: emattiza
         # If you chose API tokens for write access OR if you have a private cache
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - run: nix build .#python311-gdal
+    - run: nix build .#{{matrix.nix-attr}}
     - run: scripts/push_image.sh
       env:
-        IMAGE_URI: 'docker://ghcr.io/loftylabs/python-nix-images/python:3.11-gdal'
-        NIX_PACKAGE: 'python311-gdal'
-    - run: nix build .#python310-gdal
-    - run: scripts/push_image.sh
-      env:
-        IMAGE_URI: 'docker://ghcr.io/loftylabs/python-nix-images/python:3.10-gdal'
-        NIX_PACKAGE: 'python310-gdal'
-
-    - run: nix build .#python311
-    - run: scripts/push_image.sh
-      env:
-        IMAGE_URI: 'docker://ghcr.io/loftylabs/python-nix-images/python:3.11'
-        NIX_PACKAGE: 'python311'
-    - run: nix build .#python310
-    - run: scripts/push_image.sh
-      env:
-        IMAGE_URI: 'docker://ghcr.io/loftylabs/python-nix-images/python:3.10'
-        NIX_PACKAGE: 'python310'
+        IMAGE_URI: 'docker://ghcr.io/loftylabs/python-nix-images/${{ matrix.python-version }}'
+        NIX_PACKAGE: '${{matrix.nix-attr}}'
