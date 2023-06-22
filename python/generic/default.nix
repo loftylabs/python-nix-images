@@ -14,7 +14,7 @@ in
     copyToRoot = [
       (pkgs.buildEnv {
         name = "root";
-        paths = with pkgs; [bashInteractive coreutils pythonEnv];
+        paths = with pkgs; [bashInteractive coreutils pythonEnv poetry postgresql];
         pathsToLink = ["/bin" "/lib"];
       })
     ];
