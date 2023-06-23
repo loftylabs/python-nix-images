@@ -16,12 +16,15 @@ in
   nix2containerPkgs.nix2container.buildImage {
     name = "nix-python";
     tag = versionTag;
-    copyToRoot = [
-      (pkgs.buildEnv {
+    copyToRoot = with pkgs; with pkgs.dockerTools;[
+      (buildEnv {
         name = "root";
         paths = with pkgs; [bashInteractive coreutils pythonEnv poetry postgresql];
         pathsToLink = ["/bin" "/lib"];
       })
+      fakeNss
+      caCertificates
+      usrBinEnv
     ];
     layers = [
       (nix2containerPkgs.nix2container.buildLayer {
