@@ -16,7 +16,8 @@ in
   nix2containerPkgs.nix2container.buildImage {
     name = "nix-python";
     tag = versionTag;
-    copyToRoot = with pkgs; with pkgs.dockerTools;[
+    copyToRoot = with pkgs;
+    with pkgs.dockerTools; [
       (buildEnv {
         name = "root";
         paths = with pkgs; [bashInteractive coreutils pythonEnv poetry postgresql];
@@ -25,6 +26,7 @@ in
       fakeNss
       caCertificates
       usrBinEnv
+      busybox
     ];
     layers = [
       (nix2containerPkgs.nix2container.buildLayer {
