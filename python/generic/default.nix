@@ -9,19 +9,24 @@
   python = pkgs.${pythonTag};
   pythonBasePackages =
     if add_gdal
-    then (p: [p.gdal])
-    else (p: []);
+    then (p: [p.gdal p.psycopg2])
+    else (p: [p.psycopg2]);
   pythonEnv = python.withPackages pythonBasePackages;
 in
   nix2containerPkgs.nix2container.buildImage {
     name = "nix-python";
     tag = versionTag;
-    copyToRoot = [
-      (pkgs.buildEnv {
+    copyToRoot = with pkgs;
+    with pkgs.dockerTools; [
+      (buildEnv {
         name = "root";
         paths = with pkgs; [bashInteractive coreutils pythonEnv poetry postgresql];
         pathsToLink = ["/bin" "/lib"];
       })
+      fakeNss
+      caCertificates
+      usrBinEnv
+      busybox
     ];
     layers = [
       (nix2containerPkgs.nix2container.buildLayer {
