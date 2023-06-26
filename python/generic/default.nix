@@ -9,8 +9,8 @@
   python = pkgs.${pythonTag};
   pythonBasePackages =
     if add_gdal
-    then (p: [p.gdal])
-    else (p: []);
+    then (p: [p.gdal p.psycopg2])
+    else (p: [p.psycopg2]);
   pythonEnv = python.withPackages pythonBasePackages;
 in
   nix2containerPkgs.nix2container.buildImage {
