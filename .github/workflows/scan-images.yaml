@@ -1,4 +1,4 @@
-name: build
+name: Scan for Vulns
 on:
   workflow_dispatch:
   schedule:
