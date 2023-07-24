@@ -9,7 +9,17 @@
     flake-utils,
   }:
     flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = nixpkgs.legacyPackages.${system};
+      userOverlays = builtins.readDir ./python/overlays;
+      pkgsForSystem = system:
+        import nixpkgs {
+          system = system;
+          overlays =
+            builtins.attrValues
+            (builtins.mapAttrs
+              (name: _: import ./python/overlays/${name})
+              userOverlays);
+        };
+      pkgs = pkgsForSystem system;
       nix2containerPkgs = nix2container.packages.${system};
     in {
       packages = import ./python {
@@ -17,7 +27,12 @@
         inherit nix2containerPkgs;
       };
       devShell = pkgs.mkShell {
-      	buildInputs = with pkgs; [trivy grype syft dive];
+        buildInputs = with pkgs; [
+          trivy
+          grype
+          syft
+          dive
+        ];
       };
     });
 }
